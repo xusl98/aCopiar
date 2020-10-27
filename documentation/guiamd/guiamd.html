@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+<script>
+
+	var lastId, topMenu, topMenuHeight, menuItems, scrollItems;
+
+
+	window.onload = function (){
+	
+		
+		//left side menu setup
+	
+		lastId = -1;
+		var secciones = document.querySelectorAll("section h2");
+		var lista = document.getElementById("lista");
+		var html = "<div><a id=\"back\" href=\"\">Volver al Índice</a></div>";
+		var index = 1;
+		for (seccion of secciones){
+			seccion.parentElement.id = seccion.innerText.split(" ").join("_");
+			seccion.querySelector("a").name = seccion.innerText.split(" ").join("_");
+			
+			if (seccion.parentElement.querySelectorAll("section h3")){
+        		var subsecciones = seccion.parentElement.querySelectorAll("section h3");
+
+        		html += "<li><a class=\"anchor\" href=\"#" + seccion.innerText.split(" ").join("_") + "\">" + seccion.innerText + "</a><ul style=\"list-style-type: none;\">";
+        		var i = 1;
+        		for (subseccion of subsecciones){
+			    	subseccion.parentElement.id = subseccion.innerText.split(" ").join("_");
+			    	subseccion.querySelector("a").name = subseccion.innerText.split(" ").join("_");
+			    	html += "<li><a class=\"anchor\" href=\"#" + subseccion.innerText.split(" ").join("_") + "\">" + index + "." + i + " " + subseccion.innerText + "</a></li>";
+			    	i++;
+		    	}
+		    	html += "</ul></li>";
+      		} else {
+      			html += "<li><a class=\"anchor\" href=\"#" + seccion.innerText.split(" ").join("_") + "\">" + seccion.innerText + "</a></li>";
+      		}
+      		index ++;
+		}
+		lista.innerHTML = html;
+		
+		$('#back').attr("href", "/index.html");
+		
+		$('p').has('img').css({'text-align': 'center', 'padding-left': '15%', 'padding-right': '15%'});
+		
+		
+		
+		 
+            topMenu = $("#lista");
+            topMenuHeight = topMenu.outerHeight() + 1;
+            
+            menuItems = topMenu.find(".anchor");
+           
+            scrollItems = menuItems.map(function () {
+            
+            var href = $(this).attr("href");
+           	href = admitSpecialCharacters(href);
+
+                var item = $(href);
+                if (item.length) { return item; }
+            });
+            
+            
+            //scroll to element on menu item click
+            
+        menuItems.click(function (e) {
+            var href = $(this).attr("href");
+            href = admitSpecialCharacters(href);
+			var offsetTop = href === "#" ? 0 : $(href).offset().top;
+            $('html, body').stop().animate({
+                scrollTop: offsetTop
+            }, 550);
+            e.preventDefault();
+        });
+        
+        
+        //highlight menu item on scroll
+        
+        
+        $(window).scroll(function () {
+        
+        	
+            
+            var fromTop = $(this).scrollTop() + topMenuHeight;
+
+
+            // Get elements that are under the top of the scroll
+            var cur = scrollItems.map(function () {
+             
+                var docViewTop = $(window).scrollTop();
+                
+
+   				var elemBottom = $(this).offset().top + $(this).height();
+    			if ((elemBottom >= docViewTop && $(this).find('section').length == 0)){
+    				return this;
+    			}
+                    
+            });
+            
+
+            
+            cur = cur[0]; //get the first item under the top of the scroll
+            var id = cur && cur.length ? cur[0].id : "";
+            id = admitSpecialCharacters(id);
+
+            if (lastId !== id) {
+                lastId = id;
+                // Set/remove active class
+                if (menuItems.parent().end().filter("[href=\\#" + id + "]").parent().find("li").length != 0){ // If the li has a sublist, active class goes to first child
+                	menuItems
+                    .parent().removeClass("active")
+                    .end().filter("[href=\\#" + id + "]").parent().find("li").eq(0).addClass("active");
+                } else {
+                
+                	menuItems
+                    	.parent().removeClass("active")
+                    	.end().filter("[href=\\#" + id + "]").parent().addClass("active");
+                }
+            }
+        });
+        
+        function admitSpecialCharacters(text){
+        	if (text.includes("(")){
+            	text = text.split("(").join("\\(");
+            }
+            if (text.includes(")")){
+            	text = text.split(")").join("\\)");
+            }
+            if (text.includes("/")){
+            	text = text.split("/").join("\\/");
+            }
+            
+            return text;
+        }
+            
+            
+            
+	}
+	
+	
+
+</script>
+<style>
+body {
+  padding-left: 28vw;
+}
+
+ol {
+	/*list-style-type: none;*/
+}
+#lista li a, #lista div a{
+	text-decoration:none;
+	color:black;
+}
+
+img{
+	clear: both;
+	max-width: 100%;
+}
+
+//for image captions
+i {
+	display: block !important;
+    text-align: center;
+    font-size: 90%;
+    clear: both;
+}
+
+
+
+#separador{
+	border-left: 1px solid lightgray;
+	height: 94vh;
+	width:.5vw;
+	position: fixed;
+	left: 21vw;
+	top: 2vh;
+}
+
+.sidenav {
+  width: 20vw;
+  position: fixed;
+  z-index: 1;
+  top: 20px;
+  left: 10px;
+  /*background: #eee;*/
+  overflow-x: hidden;
+  padding: 8px 0;
+  padding-right: 2%;
+}
+
+#lista li{
+	padding: 3% !important;
+	list-style-position: inside;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+#lista div{
+	padding: 3% !important;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+#lista li.active a {
+	color: white !important;
+}
+
+#lista li.active::marker{
+	color: white;
+}
+
+#lista li{
+	padding: 0;
+}
+
+#lista li a{
+	display: inline-block;
+	width: 90%;
+}
+
+#lista div{
+	padding: 0;
+}
+
+#lista div a{
+	display: block;
+	width: 100%;
+}
+.active {
+	background-color: black;
+}
+
+#lista li:hover {
+	background-color: lightgray !important;
+	color: blue !important;
+}
+#lista li:hover a {
+	color: blue !important;
+}
+
+#lista div:hover {
+	background-color: lightgray !important;
+	color: blue !important;
+}
+#lista div:hover a {
+	color: blue !important;
+}
+
+ul li a, ol li a {
+       vertical-align:top
+  }
+
+
+
+
+.active a{
+		color: white;
+ }
+
+</style>
+  </head>
+  <body>
+  	<div class="sidenav">
+  		<ol id="lista">
+  		</ol>
+	</div>
+	<div id="separador"></div>
+    <h1>Gu&#xed;a Markdown</h1><hr /><section>
+<h2><a name="Citas"></a>Citas</h2>
+<blockquote>
+
+<p>Un pa&#xed;s, una civilizaci&#xf3;n se puede juzgar por la forma en que trata a sus animales.  &#x2014; Mahatma Gandhi</p>
+<p>Esto ser&#xed;a una cita como la que acabas de ver.</p>
+<blockquote>
+
+<p>Dentro de ella puedes anidar otra cita.</p>
+</blockquote>
+<p>La cita principal llegar&#xed;a hasta aqu&#xed;.</p>
+</blockquote><hr /></section><section>
+<h2><a name="Listas"></a>Listas</h2><section>
+<h3><a name="Desordenadas"></a>Desordenadas</h3>
+<ul>
+
+<li>Elemento de lista 1</li>
+<li>Elemento de lista 2
+<ul>
+
+<li>Elemento de lista 3</li>
+<li>Elemento de lista 4
+<ul>
+
+<li>Elemento de lista 5</li>
+<li>Elemento de lista 6</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul></section><section>
+<h3><a name="Ordenadas"></a>Ordenadas</h3>
+<ol style="list-style-type: decimal">
+
+<li>Elemento de lista 1</li>
+<li>Elemento de lista 2
+<ul>
+
+<li>Elemento de lista 3</li>
+<li>Elemento de lista 4
+<ol style="list-style-type: decimal">
+
+<li>Elemento de lista 5</li>
+<li>Elemento de lista 6</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol><hr /></section></section><section>
+<h2><a name="C.C3.B3digos_de_bloque"></a>C&#xf3;digos de bloque</h2>
+
+<div class="source">
+<div class="source">
+<pre>Creando c&#xf3;digos de bloque.
+Puedes a&#xf1;adir tantas l&#xed;neas y p&#xe1;rrafos como quieras.  
+</pre></div></div>
+<hr /></section><section>
+<h2><a name="Elementos_de_l.C3.ADnea"></a>Elementos de l&#xed;nea</h2><section>
+<h3><a name="a.C3.89nfasis_.28negritas_y_cursivas.29"></a>&#xc9;nfasis (negritas y cursivas)</h3>
+<p><i>cursiva</i> <b>negrita</b> <b><i>cursiva y negrita</i></b></p></section><section>
+<h3><a name="Links_o_enlaces"></a>Links o enlaces</h3>
+<p><b>En l&#xed;nea</b> <a class="externalLink" href="http://www.limni.net">enlace en l&#xed;nea</a> <b>Como referencia</b> Me llamo Javier Crist&#xf3;bal y tengo un blog sobre [productividad mac][blog]. En dicha [web][blog] recopilo art&#xed;culos sobre todo lo relacionado con automatizaci&#xf3;n, gesti&#xf3;n y eficiencia. [blog]: <a class="externalLink" href="http://limni.net/blog/">http://limni.net/blog/</a></p></section><section>
+<h3><a name="C.C3.B3digo"></a>C&#xf3;digo</h3>
+<p><code>Esto es una l&#xed;nea de c&#xf3;digo</code> Otra forma: Esto es una l&#xed;nea de c&#xf3;digo</p></section><section>
+<h3><a name="Im.C3.A1genes"></a>Im&#xe1;genes</h3>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/1200px-Markdown-mark.svg.png" alt="Texto alternativo" title="Título alternativo" /></p><hr /></section></section><section>
+<h2><a name="Elementos_varios"></a>Elementos varios</h2><section>
+<h3><a name="Links_autom.C3.A1ticos"></a>Links autom&#xe1;ticos</h3>
+<p><a class="externalLink" href="https://www.google.es">https://www.google.es</a></p></section></section>
+  </body>
+</html>
